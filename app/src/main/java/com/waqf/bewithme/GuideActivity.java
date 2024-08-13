@@ -5,6 +5,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -53,135 +54,104 @@ public class GuideActivity extends AppCompatActivity {
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            return;
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        }
+    }
+
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            if (isAvailable) {
+                guidesRef.child("latitude").setValue(location.getLatitude());
+                guidesRef.child("longitude").setValue(location.getLongitude());
+            }
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                if (isAvailable) {
-                    guidesRef.child("latitude").setValue(location.getLatitude());
-                    guidesRef.child("longitude").setValue(location.getLongitude());
-                }
-            }
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
+        @Override
+        public void onProviderEnabled(@NonNull String provider) {}
 
-            @Override
-            public void onProviderEnabled(@NonNull String provider) {}
-
-            @Override
-            public void onProviderDisabled(@NonNull String provider) {}
-        });
-
-        listenForBlindUser();
-        loadHelpedBlindCount();
-    }
+        @Override
+        public void onProviderDisabled(@NonNull String provider) {}
+    };
 
     private void toggleAvailability() {
         isAvailable = !isAvailable;
-        guidesRef.child("available").setValue(isAvailable);
-
-        if (isAvailable) {
-            statusTextView.setText("متاح");
-            toggleAvailabilityButton.setText("أنت غير متاح الآن");
-        } else {
-            statusTextView.setText("غير متاح");
-            toggleAvailabilityButton.setText("أنت متاح الآن");
-        }
+        guidesRef.child("available").setValue(isAvailable)
+                .addOnSuccessListener(aVoid -> {
+                    if (isAvailable) {
+                        statusTextView.setText("أنت متاح الآن");
+                        toggleAvailabilityButton.setText("اجعلني غير متاح");
+                        listenForBlindUser();
+                    } else {
+                        resetGuideStatus();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(GuideActivity.this, "فشل في تحديث الحالة: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void listenForBlindUser() {
-        DatabaseReference blindUserRef = FirebaseDatabase.getInstance().getReference("requests");
-        blindUserRef.addValueEventListener(new ValueEventListener() {
+        DatabaseReference requestsRef = FirebaseDatabase.getInstance().getReference("requests");
+        requestsRef.orderByChild("guideId").equalTo(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot requestSnapshot : snapshot.getChildren()) {
-                        String name = requestSnapshot.child("name").getValue(String.class);
-                        String phoneNumber = requestSnapshot.child("phoneNumber").getValue(String.class);
+                for (DataSnapshot requestSnapshot : snapshot.getChildren()) {
+                    String status = requestSnapshot.child("status").getValue(String.class);
+                    if ("pending".equals(status)) {
+                        currentRequestId = requestSnapshot.getKey();
+                        String userName = requestSnapshot.child("name").getValue(String.class);
+                        String userPhoneNumber = requestSnapshot.child("phoneNumber").getValue(String.class);
                         double userLat = requestSnapshot.child("latitude").getValue(Double.class);
                         double userLon = requestSnapshot.child("longitude").getValue(Double.class);
 
-                        String userLocation = "موقع الكفيف: " + userLat + ", " + userLon;
-                        String userInfo = "الاسم: " + name + ", الرقم: " + phoneNumber;
+                        userInfoTextView.setText("اسم المستخدم: " + userName + "\nرقم الهاتف: " + userPhoneNumber);
+                        map.setText("موقع المستخدم: https://www.google.com/maps/search/?api=1&query=" + userLat + "," + userLon);
+                        completeHelpButton.setVisibility(View.VISIBLE);
 
-                        userInfoTextView.setText(userLocation + "\n" + userInfo);
-                        String mapLink = "https://maps.google.com/?q=" + userLat + "," + userLon;
-                        map.setText(mapLink);
-
-                        if (isAvailable) {
-                            toggleAvailability();
-                            currentRequestId = requestSnapshot.getKey();
-                            completeHelpButton.setVisibility(View.VISIBLE);
-                        }
+                        requestSnapshot.getRef().child("status").setValue("accepted");
                     }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(GuideActivity.this, "فشل في جلب بيانات الكفيف", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void incrementHelpedBlindCount() {
-        helpedBlindCount++;
-        guidesRef.child("helpedBlindCount").setValue(helpedBlindCount);
-        helpedBlindCountTextView.setText("عدد الكفيفين المساعدين: " + helpedBlindCount);
-    }
-
-    private void loadHelpedBlindCount() {
-        guidesRef.child("helpedBlindCount").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    helpedBlindCount = snapshot.getValue(Integer.class);
-                    helpedBlindCountTextView.setText("عدد الكفيفين المساعدين: " + helpedBlindCount);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(GuideActivity.this, "فشل في تحميل عدد الكفيفين المساعدين", Toast.LENGTH_SHORT).show();
+                Toast.makeText(GuideActivity.this, "فشل في متابعة طلب المستخدم: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void completeHelp() {
         if (currentRequestId != null) {
-            map.setText("");
-            userInfoTextView.setText("جار البحث عن كفيف يحتاج مساعدة..");
-
-            DatabaseReference requestsRef = FirebaseDatabase.getInstance().getReference("requests").child(currentRequestId);
-            requestsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        // نقل البيانات إلى جدول "done"
-                        DatabaseReference doneRef = FirebaseDatabase.getInstance().getReference("done").child(currentRequestId);
-                        doneRef.setValue(snapshot.getValue())
-                                .addOnSuccessListener(aVoid -> {
-                                    // حذف البيانات من جدول "requests"
-                                    requestsRef.removeValue()
-                                            .addOnSuccessListener(aVoid1 -> {
-                                                Toast.makeText(GuideActivity.this, "تم نقل الطلب إلى جدول done بنجاح", Toast.LENGTH_SHORT).show();
-                                                incrementHelpedBlindCount();
-                                                completeHelpButton.setVisibility(View.GONE); // إخفاء الزر بعد إتمام المساعدة
-                                            })
-                                            .addOnFailureListener(e -> Toast.makeText(GuideActivity.this, "فشل في حذف الطلب من جدول requests", Toast.LENGTH_SHORT).show());
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(GuideActivity.this, "فشل في نقل الطلب إلى جدول done", Toast.LENGTH_SHORT).show());
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(GuideActivity.this, "فشل في جلب بيانات الطلب", Toast.LENGTH_SHORT).show();
-                }
-            });
+            DatabaseReference requestRef = FirebaseDatabase.getInstance().getReference("requests").child(currentRequestId);
+            requestRef.child("completed").setValue(true)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "تم إتمام المساعدة بنجاح", Toast.LENGTH_SHORT).show();
+                        incrementHelpedBlindCount();
+                        resetGuideStatus();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "فشل في إتمام المساعدة: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        } else {
+            Toast.makeText(this, "لا يوجد طلب حاليًا", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void resetGuideStatus() {
+        statusTextView.setText("أنت غير متاح الآن");
+        toggleAvailabilityButton.setText("اجعلني متاح");
+        userInfoTextView.setText("");
+        map.setText("");
+        completeHelpButton.setVisibility(View.INVISIBLE);
+    }
+
+    private void incrementHelpedBlindCount() {
+        helpedBlindCount++;
+        guidesRef.child("helpedBlindCount").setValue(helpedBlindCount)
+                .addOnSuccessListener(aVoid -> helpedBlindCountTextView.setText("عدد المكفوفين المساعدين: " + helpedBlindCount))
+                .addOnFailureListener(e -> Toast.makeText(GuideActivity.this, "فشل في تحديث عدد المكفوفين المساعدين: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }

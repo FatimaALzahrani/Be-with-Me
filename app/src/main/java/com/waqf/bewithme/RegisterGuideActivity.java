@@ -48,13 +48,13 @@ public class RegisterGuideActivity extends AppCompatActivity {
         }
 
         // الحصول على معرف المستخدم الحالي من Firebase Auth
-        String userId = mAuth.getCurrentUser().getUid();
+        String guideId = mAuth.getCurrentUser().getUid();
 
         // إعداد بيانات المرشد
-        Guide guide = new Guide(name, phoneNumber, 0.0, 0.0);
+        Request guide = new Request(name, phoneNumber, 0.0, 0.0,guideId);
 
         // تخزين بيانات المرشد في قاعدة البيانات
-        guidesRef.child(userId).setValue(guide).addOnCompleteListener(task -> {
+        guidesRef.child(guideId).setValue(guide).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(RegisterGuideActivity.this, "تم تسجيل المرشد بنجاح", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(RegisterGuideActivity.this,GuideActivity.class);

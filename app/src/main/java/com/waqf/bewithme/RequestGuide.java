@@ -2,10 +2,10 @@ package com.waqf.bewithme;
 
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,145 +14,159 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class RequestGuide extends AppCompatActivity {
 
     private LocationManager locationManager;
-    private TextView statusTextView;
     private TextView guideInfoTextView;
     private Button requestGuideButton;
-
-    private DatabaseReference guidesRef;
-    private DatabaseReference requestsRef;
-
+    private DatabaseReference requestsRef, guidesRef;
     private TextToSpeech textToSpeech;
-    private boolean requestSent = false;
-    private boolean guideInfoSpoken = false;  // Flag to check if the guide info has been spoken
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_guide);
 
-        statusTextView = findViewById(R.id.statusTextView);
         guideInfoTextView = findViewById(R.id.guideInfoTextView);
         requestGuideButton = findViewById(R.id.requestGuideButton);
 
-        // إعداد مرجع قاعدة البيانات
-        guidesRef = FirebaseDatabase.getInstance().getReference("guides");
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         requestsRef = FirebaseDatabase.getInstance().getReference("requests");
+        guidesRef = FirebaseDatabase.getInstance().getReference("guides");
 
-        // إعداد TextToSpeech
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 textToSpeech.setLanguage(Locale.US);
-//                speak("مرحبًا، يمكنك الآن استخدام الأزرار للتفاعل.");
             }
         });
 
-        // إعداد زر طلب المرشد
-        requestGuideButton.setOnClickListener(v -> {
-            statusTextView.setText("جاري البحث عن مرشد قريب...");
-            speak("جاري البحث عن مرشد قريب...");
-            requestNearestGuide();
-        });
+        requestGuideButton.setOnClickListener(v -> findNearestAvailableGuide());
 
-        // إعداد GPS
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-    }
-
-    private void requestNearestGuide() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+    }
+
+    private void findNearestAvailableGuide() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "تحتاج إلى منح صلاحيات الموقع للوصول إلى أقرب مرشد", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                findNearestGuide(location);
-            }
+        Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {}
+        if (lastKnownLocation != null) {
+            double userLat = lastKnownLocation.getLatitude();
+            double userLon = lastKnownLocation.getLongitude();
 
-            @Override
-            public void onProviderEnabled(@NonNull String provider) {}
+            String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users").child(userID);
 
-            @Override
-            public void onProviderDisabled(@NonNull String provider) {}
-        });
-    }
+            usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String userName = snapshot.child("name").getValue(String.class);
+                        int userPhoneNumber = snapshot.child("phoneNumber").getValue(int.class);
 
-    private void findNearestGuide(Location userLocation) {
-        guidesRef.orderByChild("available").equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Guide nearestGuide = null;
-                float nearestDistance = Float.MAX_VALUE;
+                        guidesRef.orderByChild("available").equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    double minDistance = Double.MAX_VALUE;
+                                    Guide nearestGuide = null;
+                                    String nearestGuideId = null;
 
-                for (DataSnapshot guideSnapshot : snapshot.getChildren()) {
-                    double lat = guideSnapshot.child("latitude").getValue(Double.class);
-                    double lon = guideSnapshot.child("longitude").getValue(Double.class);
-                    String name = guideSnapshot.child("name").getValue(String.class);
-                    String phoneNumber = guideSnapshot.child("phoneNumber").getValue(String.class);
+                                    for (DataSnapshot guideSnapshot : snapshot.getChildren()) {
+                                        Double guideLat = guideSnapshot.child("latitude").getValue(Double.class);
+                                        Double guideLon = guideSnapshot.child("longitude").getValue(Double.class);
 
-                    Location guideLocation = new Location("");
-                    guideLocation.setLatitude(lat);
-                    guideLocation.setLongitude(lon);
+                                        if (guideLat != null && guideLon != null) {
+                                            double distance = calculateDistance(userLat, userLon, guideLat, guideLon);
 
-                    float distance = userLocation.distanceTo(guideLocation);
+                                            if (distance < minDistance) {
+                                                minDistance = distance;
+                                                nearestGuide = guideSnapshot.getValue(Guide.class);
+                                                nearestGuideId = guideSnapshot.getKey();
+                                            }
+                                        }
+                                    }
 
-                    if (distance < nearestDistance) {
-                        nearestDistance = distance;
-                        nearestGuide = new Guide(name, phoneNumber, lat, lon);
+                                    if (nearestGuide != null && nearestGuideId != null) {
+                                        guideInfoTextView.setText("الاسم: " + nearestGuide.getName() + "\nرقم الهاتف: " + nearestGuide.getPhoneNumber());
+                                        speak("تم العثور على أقرب مرشد. الاسم: " + nearestGuide.getName() + " رقم الهاتف: " + nearestGuide.getPhoneNumber());
+
+                                        sendGuideRequest(nearestGuide, nearestGuideId, userName, String.valueOf(userPhoneNumber), userLat, userLon);
+                                    } else {
+                                        Toast.makeText(RequestGuide.this, "لا يوجد مرشدون متاحون حاليًا", Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Toast.makeText(RequestGuide.this, "لا يوجد مرشدون متاحون حاليًا", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Toast.makeText(RequestGuide.this, "فشل في العثور على مرشد", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(RequestGuide.this, "فشل في الحصول على بيانات المستخدم", Toast.LENGTH_SHORT).show();
                     }
                 }
 
-                if (nearestGuide != null) {
-                    guideInfoTextView.setText("أقرب مرشد: " + nearestGuide.getName() + " - " + nearestGuide.getPhoneNumber());
-                    if (!guideInfoSpoken) {  // Check if guide info has been spoken
-                        speak("أقرب مرشد: " + nearestGuide.getName() + " - " + nearestGuide.getPhoneNumber());
-                        guideInfoSpoken = true;  // Set flag to true after speaking
-                    }
-                    sendGuideRequest(nearestGuide);
-                } else {
-                    guideInfoTextView.setText("لا يوجد مرشد متاح حاليًا");
-                    speak("لا يوجد مرشد متاح حاليًا");
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(RequestGuide.this, "فشل في جلب بيانات المستخدم", Toast.LENGTH_SHORT).show();
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(RequestGuide.this, "فشل في جلب بيانات المرشدين", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void sendGuideRequest(Guide guide) {
-        if (requestSent) return;
-
-        String requestId = requestsRef.push().getKey();
-        if (requestId != null) {
-            requestsRef.child(requestId).setValue(new Request(guide.getName(), guide.getPhoneNumber(), guide.getLatitude(), guide.getLongitude()))
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "تم إرسال طلب للمرشد: " + guide.getName(), Toast.LENGTH_SHORT).show();
-                        speak("تم إرسال الطلب للمرشد الأقرب.");
-                        requestSent = true;
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "فشل في إرسال الطلب: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+            });
         } else {
-            Toast.makeText(this, "فشل في إرسال الطلب", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "لا يمكن الحصول على الموقع الحالي", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void sendGuideRequest(Guide guide, String guideId, String userName, String userPhoneNumber, double userLat, double userLon) {
+        DatabaseReference requestRef = FirebaseDatabase.getInstance().getReference("requests").push();
+        String requestId = requestRef.getKey();
+
+        Map<String, Object> requestData = new HashMap<>();
+        requestData.put("guideId", guideId);
+        requestData.put("userId", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        requestData.put("status", "pending");
+        requestData.put("name", userName);
+        requestData.put("phoneNumber", userPhoneNumber);
+        requestData.put("latitude", userLat);
+        requestData.put("longitude", userLon);
+
+        requestRef.setValue(requestData)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(RequestGuide.this, "تم إرسال الطلب بنجاح", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(RequestGuide.this, "فشل في إرسال الطلب: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius of the earth in km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c * 1000; // convert to meters
     }
 
     private void speak(String text) {
@@ -162,11 +176,14 @@ public class RequestGuide extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        if (textToSpeech != null) {
-            textToSpeech.stop();
-            textToSpeech.shutdown();
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+            } else {
+                Toast.makeText(this, "الصلاحيات غير ممنوحة", Toast.LENGTH_SHORT).show();
+            }
         }
-        super.onDestroy();
     }
 }

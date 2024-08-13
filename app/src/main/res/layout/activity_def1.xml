@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:text="نحسِّن"
             android:layout_gravity="center"
-            android:layout_marginTop="-150dp"
+            android:layout_marginTop="-120dp"
             android:textSize="30sp"
             android:textStyle="bold" />
 
@@ -65,6 +65,7 @@
             android:text="تجربة المسلم الكفيف لآداء مناسك العمرة والحج بأيسر الطرق وأسهلها"
             android:layout_gravity="center"
             android:gravity="center"
+            android:layout_marginTop="-10dp"
             android:textColor="#A8A8A9"
             android:textSize="20sp" />
 
@@ -73,7 +74,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="10dp">
+            android:padding="10dp"
+            android:layout_marginTop="-10dp">
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -81,7 +83,7 @@
                 android:text="التالي"
                 android:onClick="toDef2"
                 android:layout_marginStart="20dp"
-                android:gravity="end"
+                android:gravity="start"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:textColor="#8A704D"
