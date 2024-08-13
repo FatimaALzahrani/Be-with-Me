@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient"
+    tools:context=".Home"
+    >
+    <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="740dp"
+        android:src="@drawable/islamic" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:src="@drawable/logo2" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:src="@drawable/img" />
+
+    <androidx.appcompat.widget.AppCompatButton
+    android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="مُعتمـر"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:background="@drawable/button"
+        android:layout_margin="40px"
+        android:textSize="70px"
+        android:onClick="Umrah"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="حـاج"
+        android:textStyle="bold"
+        android:textColor="#B49264"
+        android:background="@drawable/button2"
+        android:layout_margin="40px"
+        android:textSize="70px"
+        android:onClick="Haj"
+        />
+    </LinearLayout>
+    </FrameLayout>
+
+    </ScrollView>

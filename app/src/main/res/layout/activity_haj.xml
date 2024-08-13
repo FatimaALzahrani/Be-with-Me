@@ -1,0 +1,224 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".Haj"
+    android:textDirection="rtl"
+    android:layoutDirection="rtl"
+    android:background="#FFF9F2">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="740dp"
+            android:src="@drawable/islamic" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Header Layout -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="20dp"
+                android:padding="16dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/phone"
+                    android:contentDescription="مساعدة"
+                    android:scaleType="centerInside"
+                    android:onClick="Guide"
+                    android:layout_margin="4dp"/>
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/logo2"
+                    android:scaleType="centerInside"
+                    android:layout_margin="4dp"/>
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_menu"
+                    android:contentDescription="القائمة"
+                    android:scaleType="centerInside"
+                    android:onClick="openMenu"
+                    android:id="@+id/menuIcon"
+                    android:layout_margin="4dp"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/usernameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="أهلًا أخي المُعتمر"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="-30dp"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+
+            <!-- Buttons Layout -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="20dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:minWidth="120dp"
+                    android:textColor="@color/black"
+                    android:background="@drawable/button"
+                    android:textSize="35px"
+                    android:layout_gravity="start"
+                    android:layout_marginEnd="60dp"
+                    android:text="عداد الطواف"
+                    android:id="@+id/twaf"
+                    android:onClick="Twaf"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:minWidth="120dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:background="@drawable/button"
+                    android:textSize="35px"
+                    android:onClick="Sai"
+                    android:text="عداد السعي "
+                    android:id="@+id/sai"/>
+            </LinearLayout>
+
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="370dp"
+                android:layout_marginTop="10dp"
+                android:layout_margin="16dp"/>
+
+            <FrameLayout
+                android:layout_marginTop="-60dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/bg"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="start"
+                    android:layout_gravity="bottom"
+                    android:padding="8dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginBottom="-6dp"
+                        >
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_umrah_journey"
+                            android:contentDescription="رحلة العمرة"
+                            android:scaleType="centerInside"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="رحلة الحاج"
+                            android:textSize="14sp"                        android:textColor="@color/white"
+                            android:textAlignment="center"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:onClick="services"
+                        android:layout_marginBottom="-6dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_services"
+                            android:contentDescription="خدمات الإعاشة"
+                            android:scaleType="centerInside"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="خدمات الإعاشة"
+                            android:textSize="14sp"
+                            android:textColor="@color/white"
+                            android:textAlignment="center"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginBottom="-6dp"
+                        android:onClick="translate"
+                        >
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_transport"
+                            android:contentDescription="النقل"
+                            android:scaleType="centerInside"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="النقل"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textAlignment="center"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </FrameLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+</ScrollView>

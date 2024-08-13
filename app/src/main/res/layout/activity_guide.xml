@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="#FFF9F2">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="740dp"
+        android:src="@drawable/islamic" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center">
+
+    <TextView
+        android:id="@+id/statusTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="حالتك: غير متاح"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:gravity="center" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/toggleAvailabilityButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="أنت متاح الآن"
+        android:background="@drawable/button"
+        android:layout_below="@id/editTextPhoneNumber"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/userInfoTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="معلومات الكفيف ستظهر هنا"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginTop="24dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/map"
+        android:autoLink="web"/>
+
+    <TextView
+        android:id="@+id/helpedBlindCountTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="عدد الكفيفين المساعدين: 0"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginTop="24dp" />
+
+    <Button
+        android:id="@+id/completeHelpButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="مساعدة مكتملة"
+        android:padding="12dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone" />
+
+</LinearLayout>
+</FrameLayout>

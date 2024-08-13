@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "177310549154",
+    "project_id": "be-with-me-12",
+    "storage_bucket": "be-with-me-12.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:177310549154:android:571096c66903c3c98043fb",
+        "android_client_info": {
+          "package_name": "com.waqf.bewithme"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT5lnpCMQ1fiO__UYJpgLCSD5tf_1Wv1I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

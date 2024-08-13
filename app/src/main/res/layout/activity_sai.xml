@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="#FFF9F2">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="740dp"
+        android:src="@drawable/islamic" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="عداد السعي"
+        android:gravity="center"
+        android:textSize="38dp"
+        android:textStyle="bold"
+        android:layout_marginBottom="50px"
+        android:id="@+id/counter"
+        android:layout_above="@id/progressBar"
+        />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:indeterminate="false"
+        android:max="7"
+        android:progress="0"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/lapCountTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0/7"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:layout_centerInParent="true"/>
+
+</RelativeLayout>
+</FrameLayout>

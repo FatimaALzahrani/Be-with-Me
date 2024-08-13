@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="#FFF9F2">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="740dp"
+        android:src="@drawable/islamic" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:padding="16dp"
+        android:gravity="center">
+
+
+    <EditText
+        android:id="@+id/editTextName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="اسم المرشد" />
+
+    <EditText
+        android:id="@+id/editTextPhoneNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="رقم الهاتف"
+        android:layout_below="@id/editTextName"
+        android:layout_marginTop="8dp" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="تسجيل"
+        android:background="@drawable/button"
+        android:layout_below="@id/editTextPhoneNumber"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_marginTop="20dp" />
+
+</RelativeLayout>
+</FrameLayout>
