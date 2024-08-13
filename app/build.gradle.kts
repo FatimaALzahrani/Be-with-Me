@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
+//    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -41,6 +42,15 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("com.google.firebase:firebase-auth:23.0.0")
     implementation("com.google.firebase:firebase-database:21.0.0")
+
+//    implementation("com.github.AgoraIO-Community:Android-UIKit:v2.0.0")
+//    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+//    implementation( "androidx.navigation:navigation-compose:2.8.0-beta07")
+//    implementation ("androidx.activity:activity-compose:1.9.1")
+//    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+//    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+//    implementation ("io.agora.rtc:full-sdk:4.0.1")
+    implementation("io.agora.rtc:full-rtc-basic:4.4.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

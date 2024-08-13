@@ -40,7 +40,7 @@
                 android:textColor="#B49264"
                 android:background="@drawable/button2"
                 android:layout_margin="40px"
-                android:textSize="70px"
+                android:textSize="60px"
                 android:onClick="startNow"
                 />
         </LinearLayout>

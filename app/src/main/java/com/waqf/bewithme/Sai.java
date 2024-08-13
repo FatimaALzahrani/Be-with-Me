@@ -31,10 +31,10 @@ public class Sai extends AppCompatActivity {
     private LocationManager locationManager;
     private TextToSpeech textToSpeech;
 
-    // إحداثيات الصفا والمروة
-    private final double safaLatitude = 20.2879036; // إحداثيات الصفا
+    // Coordinates for Safa and Marwa
+    private final double safaLatitude = 20.2879036; // Safa coordinates
     private final double safaLongitude = 41.3168808;
-    private final double marwaLatitude = 20.288164; // إحداثيات المروة
+    private final double marwaLatitude = 20.288164; // Marwa coordinates
     private final double marwaLongitude = 41.316866;
 
     private int lapCount = 0;
@@ -90,11 +90,6 @@ public class Sai extends AppCompatActivity {
                 boolean currentlyAtMarwa = Math.abs(currentLatitude - marwaLatitude) < tolerance &&
                         Math.abs(currentLongitude - marwaLongitude) < tolerance;
 
-                Log.d("LocationCheck", "Current Lat: " + currentLatitude + ", Lon: " + currentLongitude);
-                Log.d("LocationCheck", "Currently At Safa: " + currentlyAtSafa);
-                Log.d("LocationCheck", "Currently At Marwa: " + currentlyAtMarwa);
-                Log.d("LocationCheck", "Lap Count: " + lapCount);
-
                 if (currentlyAtSafa && !isAtSafa && hasStartedSai) {
                     lapCount = Math.min(lapCount + 1, 7);
                     String[] arr = {"الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع"};
@@ -110,11 +105,12 @@ public class Sai extends AppCompatActivity {
                         Intent intent = new Intent(Sai.this, Umrah.class);
                         intent.putExtra("Sai", 7);
                         startActivity(intent);
+                        finish();
                     }
 
                     isAtSafa = true;
                     isAtMarwa = false;
-                    hasMovedFromSafa = false;
+                    hasMovedFromSafa = true;
                 } else if (currentlyAtMarwa && !isAtMarwa && hasStartedSai) {
                     lapCount = Math.min(lapCount + 1, 7);
                     String[] arr = {"الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع"};
@@ -122,11 +118,11 @@ public class Sai extends AppCompatActivity {
                     progressBar.setProgress(lapCount);
                     lapCountTextView.setText(lapCount + "/7");
 
-                    saveSaiData(); // Save the progress to Firebase
+                    saveSaiData();
 
                     isAtMarwa = true;
                     isAtSafa = false;
-                    hasMovedFromMarwa = false;
+                    hasMovedFromMarwa = true;
                 }
 
                 if (!hasStartedSai && currentlyAtSafa) {
@@ -136,26 +132,21 @@ public class Sai extends AppCompatActivity {
                     isAtSafa = true;
                 }
 
-                if (currentlyAtSafa) {
+                // Additional check to avoid repeatedly setting flags
+                if (!currentlyAtSafa && !currentlyAtMarwa) {
                     hasMovedFromSafa = false;
-                } else if (currentlyAtMarwa) {
                     hasMovedFromMarwa = false;
                 }
-
-                Log.i("LocationCheck", "User is moving between Safa and Marwa.");
             }
 
             @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
 
             @Override
-            public void onProviderEnabled(String provider) {
-            }
+            public void onProviderEnabled(String provider) {}
 
             @Override
-            public void onProviderDisabled(String provider) {
-            }
+            public void onProviderDisabled(String provider) {}
         };
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -171,7 +162,7 @@ public class Sai extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     lapCount = dataSnapshot.child("lapCount").getValue(Integer.class);
-                    if (lapCount > 0 && lapCount <=7) {
+                    if (lapCount > 0 && lapCount <= 7) {
                         progressBar.setProgress(lapCount);
                         lapCountTextView.setText(lapCount + "/7");
                         hasStartedSai = true;
@@ -204,7 +195,7 @@ public class Sai extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);

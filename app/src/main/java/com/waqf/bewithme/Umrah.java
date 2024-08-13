@@ -223,11 +223,9 @@ public class Umrah extends AppCompatActivity {
         popupMenu.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == R.id.support) {
-                // Handle Support action
                 Toast.makeText(Umrah.this, "الدعم", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (id == R.id.logout) {
-                // Handle Logout action
                 logout();
                 return true;
             }
@@ -245,6 +243,11 @@ public class Umrah extends AppCompatActivity {
 
     public void Twaf(View view) {
         Intent intent = new Intent(Umrah.this, Tawaf.class);
+        startActivity(intent);
+    }
+
+    public void Sai(View view) {
+        Intent intent = new Intent(Umrah.this, Sai.class);
         startActivity(intent);
     }
 

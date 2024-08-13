@@ -101,6 +101,7 @@ public class Tawaf extends AppCompatActivity {
                         intent.putExtra("Tawaf", 7);
                         Toast.makeText(Tawaf.this, "انتهيت من الطواف!", Toast.LENGTH_SHORT).show();
                         startActivity(intent);
+                        finish();
                     }
 
                     hasLeftTarget = false;

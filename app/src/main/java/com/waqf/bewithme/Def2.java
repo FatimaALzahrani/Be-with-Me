@@ -25,7 +25,7 @@ public class Def2 extends AppCompatActivity {
     }
 
     public void toDef1(View view) {
-        Intent intent = new Intent(Def2.this , Def3.class);
+        Intent intent = new Intent(Def2.this , Def1.class);
         startActivity(intent);
     }
 }

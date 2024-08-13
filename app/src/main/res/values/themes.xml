@@ -4,7 +4,8 @@
         <!-- Customize your light theme here. -->
         <item name="android:fontFamily">@font/amiriregular</item>
         <item name="android:paddingTop">-5dp</item>
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">#B49264</item>
+        <item name="colorSecondary">#FFF9F2</item>
     </style>
 
     <style name="Theme.BeWithMe" parent="Base.Theme.BeWithMe" />
